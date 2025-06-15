@@ -1,0 +1,27 @@
+podman search consul
+podman pull <consul-name>
+
+podman run -d --name=consul-server \
+  -v consul_data:/consul/data \
+  -v $(pwd)/config:/consul/config \
+  -p 8500:8500 \
+  -p 8600:8600/udp \
+  consul agent -server -bootstrap-expect=1 -node=consul1 -client=0.0.0.0 -config-dir=/consul/config
+
+podman run -d --name=consul-server \
+  -p 8500:8500 \
+  -p 8600:8600/udp \
+  -v consul_data:/consul/data \
+  -v $(pwd)/consul.hcl:/consul/config/consul.hcl:ro \
+  consul agent -dev -client=0.0.0.0 -config-dir=/consul/config
+
+podman run -d --name=consul-server \
+  --net=host \
+  consul agent -dev -client=0.0.0.0
+
+
+podman exec -it consul-server /bin/sh
+/ # consul members
+
+
+ipconfig getifaddr en0
